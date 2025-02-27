@@ -6,7 +6,7 @@ const BillboardPage = async ({
 }: {
   params: { billboardId: string };
 }) => {
-  const { billboardId } = await params;
+  const { billboardId } = params;
   const billboard = await prismadb.billboard.findUnique({
     where: {
       id: billboardId, // or just `id: billboardId`
