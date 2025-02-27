@@ -1,15 +1,17 @@
 import prismadb from "@/lib/prismadb";
 import { BillboardForm } from "./components/billboard-form";
 
-type PageProps = {
-  params: {
-    billboardId: string;
-    storeId: string;
-  };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+interface PageParams {
+  billboardId: string;
+  storeId: string;
+}
 
-export default async function BillboardPage({ params }: PageProps) {
+// Remove the custom type and use a simpler approach
+export default async function BillboardPage({
+  params,
+}: {
+  params: PageParams;
+}) {
   const billboard = await prismadb.billboard.findUnique({
     where: {
       id: params.billboardId,
