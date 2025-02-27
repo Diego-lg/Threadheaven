@@ -1,7 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 
 declare global {
-  let prisma: PrismaClient | undefined;
+  // Use var here to ensure the prisma instance is truly global
+  var prisma: PrismaClient | undefined;
 }
 
 const prismadb = globalThis.prisma || new PrismaClient();
