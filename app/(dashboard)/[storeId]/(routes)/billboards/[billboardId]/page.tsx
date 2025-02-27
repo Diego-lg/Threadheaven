@@ -1,18 +1,15 @@
 import prismadb from "@/lib/prismadb";
 import { BillboardForm } from "./components/billboard-form";
 
-// Use the proper Next.js typing for page params
-interface PageProps {
-  params: {
-    billboardId: string;
-    storeId: string;
-  };
-}
-
-const BillboardPage = async ({ params }: PageProps) => {
+const BillboardPage = async ({
+  params,
+}: {
+  params: { billboardId: string };
+}) => {
+  const { billboardId } = await params;
   const billboard = await prismadb.billboard.findUnique({
     where: {
-      id: params.billboardId,
+      id: billboardId, // or just `id: billboardId`
     },
   });
 
