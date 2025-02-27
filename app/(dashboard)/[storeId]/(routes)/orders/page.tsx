@@ -4,10 +4,14 @@ import { OrderClient } from "./components/client";
 import { OrderColumn } from "./components/columns";
 import { formatter } from "@/lib/utils";
 
-const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
+interface OrdersPageProps {
+  params: Promise<{ storeId: string }>;
+}
+
+const OrdersPage = async ({ params }: OrdersPageProps) => {
   const { storeId } = await params;
   const orders = await prismadb.order.findMany({
-    where: { storeId: storeId },
+    where: { storeId },
     include: {
       orderItems: {
         include: {

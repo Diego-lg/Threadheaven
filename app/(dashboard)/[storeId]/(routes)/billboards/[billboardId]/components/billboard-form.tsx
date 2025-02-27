@@ -63,7 +63,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
   const onSubmit = async (data: BillboardFormValues) => {
     try {
       setLoading(true);
-      const { billboardId } = await params;
+      const { billboardId } = params;
       if (initialData) {
         await axios.patch(
           `/api/${params.storeId}/billboards/${billboardId}`,
@@ -83,7 +83,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
   };
 
   const onDelete = async () => {
-    const { billboardId } = await params;
+    const { billboardId } = params;
     try {
       setLoading(true);
       await axios.delete(`/api/${params.storeId}/billboards/${billboardId}`);

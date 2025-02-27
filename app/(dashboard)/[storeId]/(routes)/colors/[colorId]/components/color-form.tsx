@@ -61,7 +61,7 @@ export const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
   const onSubmit = async (data: ColorFormValues) => {
     try {
       setLoading(true);
-      const { colorId } = await params;
+      const { colorId } = params;
       if (initialData) {
         await axios.patch(`/api/${params.storeId}/colors/${colorId}`, data);
       } else {
@@ -78,7 +78,7 @@ export const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
   };
 
   const onDelete = async () => {
-    const { colorId } = await params;
+    const { colorId } = params;
     try {
       setLoading(true);
       await axios.delete(`/api/${params.storeId}/colors/${colorId}`);

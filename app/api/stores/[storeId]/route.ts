@@ -4,13 +4,13 @@ import { NextResponse } from "next/server";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { storeId: string } }
+  { params }: { params: Promise<{ storeId: string }> }
 ) {
   try {
     const { userId } = await auth();
     const body = await req.json();
-
     const { name } = body;
+    const { storeId } = await params;
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
@@ -20,10 +20,9 @@ export async function PATCH(
       return new NextResponse("Name is required", { status: 400 });
     }
 
-    if (!params.storeId) {
+    if (!storeId) {
       return new NextResponse("Store ID is required", { status: 400 });
     }
-    const { storeId } = await params;
 
     const store = await prismadb.store.updateMany({
       where: {
@@ -38,21 +37,22 @@ export async function PATCH(
     return new NextResponse("Internal error", { status: 500 });
   }
 }
+
 export async function DELETE(
   req: Request,
-  { params }: { params: { storeId: string } }
+  { params }: { params: Promise<{ storeId: string }> }
 ) {
   try {
     const { userId } = await auth();
+    const { storeId } = await params;
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
 
-    if (!params.storeId) {
+    if (!storeId) {
       return new NextResponse("Store ID is required", { status: 400 });
     }
-    const { storeId } = await params;
 
     const store = await prismadb.store.deleteMany({
       where: {

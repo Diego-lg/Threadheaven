@@ -69,7 +69,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
   const onSubmit = async (data: CategoryFormValues) => {
     try {
       setLoading(true);
-      const { categoryId } = await params;
+      const { categoryId } = params;
       if (initialData) {
         await axios.patch(
           `/api/${params.storeId}/categories/${categoryId}`,
@@ -89,7 +89,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
   };
 
   const onDelete = async () => {
-    const { categoryId } = await params;
+    const { categoryId } = params;
     try {
       setLoading(true);
       await axios.delete(`/api/${params.storeId}/categories/${categoryId}`);

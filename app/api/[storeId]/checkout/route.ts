@@ -15,10 +15,12 @@ export async function OPTIONS() {
 
 export async function POST(
   req: Request,
-  { params }: { params: { storeId: string } }
+  { params }: { params: Promise<{ storeId: string }> }
 ) {
   try {
+    const { storeId } = await params;
     const { productIds } = await req.json();
+
     if (!productIds || productIds.length === 0) {
       return new NextResponse("Product ids are required", {
         status: 400,
@@ -49,7 +51,7 @@ export async function POST(
 
     const order = await prismadb.order.create({
       data: {
-        storeId: params.storeId,
+        storeId: storeId,
         isPaid: false,
         orderItems: {
           create: productIds.map((productId: string) => ({

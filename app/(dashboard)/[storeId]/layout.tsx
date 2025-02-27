@@ -18,7 +18,7 @@ export default async function DashboardLayout({
   }
 
   // Ensure params is awaited
-  const { storeId } = await params;
+  const { storeId } = params;
 
   const store = await prismadb.store.findFirst({
     where: {

@@ -1,17 +1,19 @@
 import prismadb from "@/lib/prismadb";
 import { BillboardForm } from "./components/billboard-form";
 
+// Update interface to match Next.js PageProps requirements
 interface BillboardPageProps {
-  params: {
-    billboardId: string;
-    storeId: string;
-  };
+  params: Promise<{ storeId: string; billboardId: string }>;
 }
 
-export default async function BillboardPage({ params }: BillboardPageProps) {
+const BillboardPage = async ({ params }: BillboardPageProps) => {
+  // Since params is properly typed as a Promise, await is correct
+  const paramsData = await params;
+  const { billboardId } = paramsData;
+
   const billboard = await prismadb.billboard.findUnique({
     where: {
-      id: params.billboardId,
+      id: billboardId,
     },
   });
 
@@ -22,4 +24,6 @@ export default async function BillboardPage({ params }: BillboardPageProps) {
       </div>
     </div>
   );
-}
+};
+
+export default BillboardPage;

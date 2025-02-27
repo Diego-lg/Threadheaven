@@ -22,6 +22,14 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "next.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/types/app/(dashboard)/[storeId]/(routes)/page.tsx",
+    ".next/types/app/(dashboard)/[storeId]/(routes)/billboards/page.tsx"
+  ],
   "exclude": ["node_modules"]
 }

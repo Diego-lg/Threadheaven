@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
     const { productId } = await params;
@@ -71,13 +71,12 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { storeId: string; productId: string } }
+  { params }: { params: Promise<{ storeId: string; productId: string }> }
 ) {
   try {
-    const { productId } = await params;
+    const { productId, storeId } = await params;
     const { userId } = await auth();
     const body = await req.json();
-    const { storeId } = await params;
     const {
       name,
       price,
@@ -88,9 +87,7 @@ export async function PATCH(
       isFeatured,
       isArchived,
     } = body;
-    if (!userId) {
-      return new NextResponse("Unauthenticated", { status: 401 });
-    }
+
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
@@ -171,14 +168,15 @@ export async function PATCH(
     return new NextResponse("Internal error", { status: 500 });
   }
 }
+
 export async function DELETE(
   req: Request,
-  { params }: { params: { storeId: string; productId: string } }
+  { params }: { params: Promise<{ storeId: string; productId: string }> }
 ) {
   try {
     const { userId } = await auth();
-    const { productId } = await params;
-    const { storeId } = await params;
+    const { productId, storeId } = await params;
+
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
@@ -200,7 +198,6 @@ export async function DELETE(
     const product = await prismadb.product.deleteMany({
       where: {
         id: productId,
-        // userId,
       },
     });
     return NextResponse.json(product);

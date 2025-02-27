@@ -8,12 +8,12 @@ import { CreditCard, DollarSign, Package } from "lucide-react";
 import { getStockCount } from "@/actions/get-stock-count";
 import { Overview } from "@/components/overview";
 import { getGraphRevenue } from "@/actions/get-graph-revenue";
+
 interface DashboardPageProps {
-  params: { storeId: string };
+  params: Promise<{ storeId: string }>;
 }
 
 const DashboardPage: React.FC<DashboardPageProps> = async ({ params }) => {
-  // Await the params before destructuring its properties
   const { storeId } = await params;
   const totalRevenue = await getTotalRevenue(storeId);
   const salesCount = await getSalesCount(storeId);

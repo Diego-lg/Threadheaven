@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params }: { params: { categoryId: string } }
+  { params }: { params: Promise<{ categoryId: string }> }
 ) {
   try {
     const { categoryId } = await params;
@@ -29,14 +29,12 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { storeId: string; categoryId: string } }
+  { params }: { params: Promise<{ storeId: string; categoryId: string }> }
 ) {
   try {
-    const { categoryId } = await params;
+    const { categoryId, storeId } = await params;
     const { userId } = await auth();
     const body = await req.json();
-    const { storeId } = await params;
-
     const { name, billboardId } = body;
 
     if (!userId) {
@@ -76,14 +74,15 @@ export async function PATCH(
     return new NextResponse("Internal error", { status: 500 });
   }
 }
+
 export async function DELETE(
   req: Request,
-  { params }: { params: { storeId: string; categoryId: string } }
+  { params }: { params: Promise<{ storeId: string; categoryId: string }> }
 ) {
   try {
     const { userId } = await auth();
-    const { categoryId } = await params;
-    const { storeId } = await params;
+    const { categoryId, storeId } = await params;
+
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
@@ -105,7 +104,6 @@ export async function DELETE(
     const category = await prismadb.category.deleteMany({
       where: {
         id: categoryId,
-        // userId,
       },
     });
     return NextResponse.json(category);

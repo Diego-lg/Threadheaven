@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params }: { params: { colorId: string } }
+  { params }: { params: Promise<{ colorId: string }> }
 ) {
   try {
     const { colorId } = await params;
@@ -26,13 +26,12 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { storeId: string; colorId: string } }
+  { params }: { params: Promise<{ storeId: string; colorId: string }> }
 ) {
   try {
-    const { colorId } = await params;
+    const { colorId, storeId } = await params;
     const { userId } = await auth();
     const body = await req.json();
-    const { storeId } = await params;
     const { name, value } = body;
 
     if (!userId) {
@@ -72,14 +71,15 @@ export async function PATCH(
     return new NextResponse("Internal error", { status: 500 });
   }
 }
+
 export async function DELETE(
   req: Request,
-  { params }: { params: { storeId: string; colorId: string } }
+  { params }: { params: Promise<{ storeId: string; colorId: string }> }
 ) {
   try {
     const { userId } = await auth();
-    const { colorId } = await params;
-    const { storeId } = await params;
+    const { colorId, storeId } = await params;
+
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
@@ -101,7 +101,6 @@ export async function DELETE(
     const color = await prismadb.color.deleteMany({
       where: {
         id: colorId,
-        // userId,
       },
     });
     return NextResponse.json(color);

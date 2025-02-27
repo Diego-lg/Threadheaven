@@ -3,8 +3,15 @@ import prismadb from "@/lib/prismadb";
 import { BillboardClient } from "./components/client";
 import { BillboardColumn } from "./components/columns";
 
-const BillboardPage = async ({ params }: { params: { storeId: string } }) => {
+// Update type to use Promise for params
+const BillboardPage = async ({
+  params,
+}: {
+  params: Promise<{ storeId: string }>;
+}) => {
+  // Use await to get the parameters from the Promise
   const { storeId } = await params;
+
   const billboards = await prismadb.billboard.findMany({
     where: { storeId: storeId },
     orderBy: { createdAt: "desc" },

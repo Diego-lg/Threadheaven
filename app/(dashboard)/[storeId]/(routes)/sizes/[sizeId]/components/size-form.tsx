@@ -58,7 +58,7 @@ export const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
   const onSubmit = async (data: SizeFormValues) => {
     try {
       setLoading(true);
-      const { sizeId } = await params;
+      const { sizeId } = params;
       if (initialData) {
         await axios.patch(`/api/${params.storeId}/sizes/${sizeId}`, data);
       } else {
@@ -75,7 +75,7 @@ export const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
   };
 
   const onDelete = async () => {
-    const { sizeId } = await params;
+    const { sizeId } = params;
     try {
       setLoading(true);
       await axios.delete(`/api/${params.storeId}/sizes/${sizeId}`);
