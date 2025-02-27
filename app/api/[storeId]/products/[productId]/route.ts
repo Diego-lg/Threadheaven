@@ -8,7 +8,6 @@ export async function GET(
 ) {
   try {
     const { productId } = await params;
-    const { userId } = await auth();
 
     if (!productId) {
       return new NextResponse("Product ID is required", { status: 400 });

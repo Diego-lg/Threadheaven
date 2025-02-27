@@ -1,14 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { propagateServerField } from "next/dist/server/lib/render-server";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 
-export function MainNav({
-  className,
-  ...propagateServerField
-}: React.HTMLAttributes<HTMLElement>) {
+export function MainNav({ className }: React.HTMLAttributes<HTMLElement>) {
   const pathname = usePathname();
   const params = useParams();
 

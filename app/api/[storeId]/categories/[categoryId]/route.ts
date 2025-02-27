@@ -8,7 +8,6 @@ export async function GET(
 ) {
   try {
     const { categoryId } = await params;
-    const { userId } = await auth();
 
     if (!categoryId) {
       return new NextResponse("CategoryId ID is required", { status: 400 });
