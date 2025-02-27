@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+
 import { stripe } from "@/lib/stripe";
 import prismadb from "@/lib/prismadb";
 
@@ -15,9 +16,19 @@ export async function POST(req: Request) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch (error: any) {
-    console.log("Webhook Error:", error.message); // Added log for webhook error
-    return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
+  } catch (error: unknown) {
+    let errorMessage = "An unknown error occurred";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else {
+      console.error("Unexpected webhook error type:", error);
+    }
+    console.log("Webhook Error:", errorMessage);
+    return new NextResponse(`Webhook Error: ${errorMessage}`, { status: 400 });
+  }
+
+  interface OrderItemType {
+    productId: string;
   }
 
   const session = event.data.object as Stripe.Checkout.Session;
@@ -45,8 +56,10 @@ export async function POST(req: Request) {
         orderItems: true,
       },
     });
-    const productIds = order.orderItems.map((orderItem) => orderItem.productId);
-    console.log("Product IDs to archive:", productIds); // Added log for product IDs to archive
+    const productIds = order.orderItems.map(
+      (orderItem: OrderItemType) => orderItem.productId
+    );
+    console.log("Product IDs to archive:", productIds);
 
     await prismadb.product.updateMany({
       where: {

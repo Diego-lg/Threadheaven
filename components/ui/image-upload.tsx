@@ -11,7 +11,16 @@ interface ImageUploadProps {
   onChange: (value: string) => void;
   onRemove: (value: string) => void;
   value: string[];
-  onError?: (error: any) => void;
+  onError?: (error: Error) => void;
+}
+
+interface CloudinaryUploadWidgetInfo {
+  secure_url: string;
+  // ... other properties if needed
+}
+
+interface CloudinaryResult {
+  info?: CloudinaryUploadWidgetInfo | string;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -25,8 +34,19 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     setIsMounted(true);
   }, []);
 
-  const onSuccess = (result: any) => {
-    onChange(result.info.secure_url);
+  const onSuccess = (result: CloudinaryResult) => {
+    if (
+      result.info &&
+      typeof result.info === "object" &&
+      "secure_url" in result.info
+    ) {
+      onChange(result.info.secure_url);
+    } else if (typeof result.info === "string") {
+      onChange(result.info); // Assuming string is the secure_url
+    } else {
+      console.error("Unexpected Cloudinary result info:", result.info);
+      // Handle error case appropriately, maybe call onError if provided
+    }
   };
 
   if (!isMounted) {
