@@ -21,6 +21,14 @@ interface CloudinaryResult {
   info?: CloudinaryUploadWidgetInfo | string;
 }
 
+interface CloudinaryImageResource {
+  secure_url: string;
+}
+
+interface CloudinaryResponse {
+  resources: CloudinaryImageResource[];
+}
+
 const ImageUpload: React.FC<ImageUploadProps> = ({
   disabled,
   onChange,
@@ -40,8 +48,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const fetchCloudinaryImages = async () => {
     try {
       const response = await fetch(`/api/cloudinary-images`);
-      const data = await response.json();
-      setExistingImages(data.resources.map((img: any) => img.secure_url));
+      const data = (await response.json()) as CloudinaryResponse;
+      setExistingImages(data.resources.map((img) => img.secure_url));
     } catch (error) {
       console.error("Error fetching Cloudinary images:", error);
     }
