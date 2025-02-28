@@ -93,7 +93,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
       // If modal is open, add the new image to the existingImages list
       if (showImageSelector) {
-        setExistingImages((prev) => [...prev, result.info.secure_url]);
+        setExistingImages((prev) => [...prev]);
       }
     } else if (typeof result.info === "string") {
       onChange(result.info);
