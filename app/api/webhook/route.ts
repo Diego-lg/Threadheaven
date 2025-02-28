@@ -4,6 +4,12 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import prismadb from "@/lib/prismadb";
 
+export const config = {
+  api: {
+    bodyParser: false, // Required for raw body parsing
+  },
+};
+
 export async function POST(req: Request) {
   const rawBody = await req.text();
   const signature = (await headers()).get("Stripe-Signature");
@@ -24,36 +30,26 @@ export async function POST(req: Request) {
     return new NextResponse("Webhook Error", { status: 400 });
   }
 
+  console.log("Webhook event received:", event.type);
+
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    console.log("Session completed:", session?.metadata);
-
-    const orderId = session?.metadata?.orderId;
-    if (!orderId) {
-      console.error("Missing order ID in metadata");
-      return new NextResponse("Missing order ID", { status: 400 });
-    }
+    console.log("Processing order:", session?.metadata?.orderId);
 
     try {
       const order = await prismadb.order.update({
-        where: { id: orderId },
+        where: { id: session?.metadata?.orderId },
         data: { isPaid: true },
         include: { orderItems: true },
       });
 
-      console.log("Order updated:", order.id);
+      console.log("Order updated successfully:", order.id);
       return new NextResponse("Success", { status: 200 });
     } catch (error) {
-      console.error("Error updating order:", error);
+      console.error("Database error:", error);
       return new NextResponse("Database error", { status: 500 });
     }
   }
 
   return new NextResponse("Event ignored", { status: 200 });
 }
-
-export const config = {
-  api: {
-    bodyParser: false, // Required for raw body parsing
-  },
-};
