@@ -189,15 +189,19 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                       key={url}
                       className="relative group aspect-square overflow-hidden rounded-md bg-zinc-800"
                     >
-                      <img
-                        src={url}
-                        alt="Cloudinary Image"
-                        className="w-full h-full object-cover cursor-pointer transition-all duration-300"
-                        onClick={() => {
-                          onChange(url);
-                          setShowImageSelector(false);
-                        }}
-                      />
+                      <div className="relative w-full h-full">
+                        <Image
+                          src={url}
+                          alt="Cloudinary Image"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          className="object-cover cursor-pointer transition-all duration-300"
+                          onClick={() => {
+                            onChange(url);
+                            setShowImageSelector(false);
+                          }}
+                        />
+                      </div>
                       <div
                         className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300"
                         onClick={() => {
