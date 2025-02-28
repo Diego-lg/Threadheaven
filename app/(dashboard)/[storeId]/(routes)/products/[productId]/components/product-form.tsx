@@ -175,9 +175,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         ...field.value.filter((current) => current.url !== url),
                       ])
                     }
-                    onError={() => {
-                      toast.error("Image upload failed. Please try again.");
-                    }}
                   />
                 </FormControl>
                 <FormMessage />
