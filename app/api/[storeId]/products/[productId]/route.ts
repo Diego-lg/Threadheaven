@@ -195,14 +195,31 @@ export async function DELETE(
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
+
+    // First, delete any related OrderItems
+    await prismadb.orderItem.deleteMany({
+      where: {
+        productId: productId,
+      },
+    });
+
+    // Then delete the product images
+    await prismadb.image.deleteMany({
+      where: {
+        productId: productId,
+      },
+    });
+
+    // Finally delete the product
     const product = await prismadb.product.deleteMany({
       where: {
         id: productId,
       },
     });
+
     return NextResponse.json(product);
   } catch (error) {
-    console.log("[PRODUCT_DELETE", error);
+    console.log("[PRODUCT_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
