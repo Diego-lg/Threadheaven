@@ -1,3 +1,8 @@
+export const config = {
+  api: {
+    bodyParser: false, // Stripe sends raw body, so disable built-in parsing
+  },
+};
 import Stripe from "stripe";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
