@@ -52,7 +52,10 @@ export async function POST(req: Request) {
       },
     });
     const productIds = order.orderItems.map((orderItem) => orderItem.productId);
-    console.log("Product IDs to archive:", productIds); // Added log for product IDs to archive
+    console.log(
+      "Product IDs to update and sync with database - stripe payment successful:",
+      productIds
+    ); // Added log for product IDs to archive
 
     await prismadb.product.updateMany({
       where: {
@@ -61,7 +64,7 @@ export async function POST(req: Request) {
         },
       },
       data: {
-        isArchived: true,
+        isArchived: false,
       },
     });
   }
