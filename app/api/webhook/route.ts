@@ -4,52 +4,60 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import prismadb from "@/lib/prismadb";
 
-export const config = {
-  api: {
-    bodyParser: false, // Required for raw body parsing
-  },
-};
-
 export async function POST(req: Request) {
-  const rawBody = await req.text();
-  const signature = (await headers()).get("Stripe-Signature");
-
-  if (!signature) {
-    return new NextResponse("Missing Stripe Signature", { status: 400 });
-  }
+  const body = await req.text();
+  const signature = (await headers()).get("Stripe-signature") as string;
 
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(
-      rawBody,
+      body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch (error) {
-    console.error("Webhook signature verification failed:", error);
-    return new NextResponse("Webhook Error", { status: 400 });
+  } catch (error: any) {
+    console.log("Webhook Error:", error.message); // Added log for webhook error
+    return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
   }
 
-  console.log("Webhook event received:", event.type);
+  const session = event.data.object as Stripe.Checkout.Session;
+  const address = session?.customer_details?.address;
 
+  const addressComponents = [
+    address?.line1,
+    address?.line2,
+    address?.city,
+    address?.state,
+    address?.postal_code,
+    address?.country,
+  ];
+
+  const addressString = addressComponents.filter((c) => c !== null).join(", ");
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    console.log("Processing order:", session?.metadata?.orderId);
+    const order = await prismadb.order.update({
+      where: { id: session?.metadata?.orderId },
+      data: {
+        isPaid: true,
+        address: addressString,
+        phone: session?.customer_details?.phone || "",
+      },
+      include: {
+        orderItems: true,
+      },
+    });
+    const productIds = order.orderItems.map((orderItem) => orderItem.productId);
+    console.log("Product IDs to archive:", productIds); // Added log for product IDs to archive
 
-    try {
-      const order = await prismadb.order.update({
-        where: { id: session?.metadata?.orderId },
-        data: { isPaid: true },
-        include: { orderItems: true },
-      });
-
-      console.log("Order updated successfully:", order.id);
-      return new NextResponse("Success", { status: 200 });
-    } catch (error) {
-      console.error("Database error:", error);
-      return new NextResponse("Database error", { status: 500 });
-    }
+    await prismadb.product.updateMany({
+      where: {
+        id: {
+          in: [...productIds],
+        },
+      },
+      data: {
+        isArchived: true,
+      },
+    });
   }
-
-  return new NextResponse("Event ignored", { status: 200 });
+  return new NextResponse(null, { status: 200 });
 }
