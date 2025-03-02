@@ -99,12 +99,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     ) {
       onChange(result.info.secure_url);
 
-      // If modal is open, add the new image to the existingImages list
-      if (showImageSelector) {
-        setExistingImages((prev) => [...prev]);
-      }
+      // Add the new image to the existingImages list
+      setExistingImages((prev) => [...prev, result.info.secure_url]);
     } else if (typeof result.info === "string") {
       onChange(result.info);
+
+      // Add the new image to the existingImages list if it's a string URL
+      setExistingImages((prev) => [...prev, result.info as string]);
     } else {
       console.error("Unexpected Cloudinary result info:", result.info);
     }
@@ -174,7 +175,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
               {/* Upload Button in Modal */}
               <div className="mb-6">
-                <CldUploadWidget onSuccess={onSuccess} uploadPreset="nwkydo0u">
+                <CldUploadWidget
+                  onSuccess={onSuccess}
+                  uploadPreset="nwkydo0u"
+                  options={{
+                    folder: "next-cloudinary",
+                  }}
+                >
                   {({ open }) => (
                     <Button
                       type="button"
@@ -184,7 +191,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                       className="w-full bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700"
                     >
                       <Upload className="h-4 w-4 mr-2" />
-                      Upload new images to Cloudinary
+                      Upload images to Cloudinary
                     </Button>
                   )}
                 </CldUploadWidget>
