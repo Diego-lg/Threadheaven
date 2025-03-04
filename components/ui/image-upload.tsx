@@ -39,6 +39,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [showImageSelector, setShowImageSelector] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -46,12 +47,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   }, []);
 
   const fetchCloudinaryImages = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch(`/api/cloudinary-images`);
       const data = (await response.json()) as CloudinaryResponse;
       setExistingImages(data.resources.map((img) => img.secure_url));
     } catch (error) {
       console.error("Error fetching Cloudinary images:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -97,18 +101,24 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       typeof result.info === "object" &&
       "secure_url" in result.info
     ) {
-      onChange(result.info.secure_url);
+      const imageUrl = result.info.secure_url;
+      onChange(imageUrl);
 
       // Add the new image to the existingImages list
-      setExistingImages((prev) => [...prev, result.info.secure_url]);
-    } else if (typeof result.info === "string") {
-      onChange(result.info);
+      setExistingImages((prev) => [...prev, imageUrl]);
+    } else if (result.info && typeof result.info === "string") {
+      const imageUrl = result.info;
+      onChange(imageUrl);
 
-      // Add the new image to the existingImages list if it's a string URL
-      setExistingImages((prev) => [...prev, result.info as string]);
+      // Add the new image to the existingImages list
+      setExistingImages((prev) => [...prev, imageUrl]);
     } else {
       console.error("Unexpected Cloudinary result info:", result.info);
     }
+  };
+
+  const openImageBrowser = () => {
+    setShowImageSelector(true);
   };
 
   if (!isMounted) {
@@ -139,29 +149,26 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       </div>
 
       <div className="flex flex-wrap gap-4">
-        {/* Upload Button */}
-
-        {/* Select Existing Image Button */}
         <Button
           type="button"
-          onClick={() => setShowImageSelector(!showImageSelector)}
+          onClick={openImageBrowser}
           variant="outline"
           className="border-zinc-300 hover:bg-zinc-100"
         >
-          {" "}
           <ImagePlus className="h-4 w-4 mr-2" />
           Upload an image
         </Button>
       </div>
 
-      {/* Image Selection Modal */}
+      {/* Image Selector Modal */}
       {showImageSelector && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-4xl bg-black text-white rounded-xl shadow-xl border border-zinc-700 overflow-hidden">
+          <div className="w-full max-w-5xl bg-black text-white rounded-xl shadow-xl border border-zinc-700 overflow-hidden">
             <div className="p-6">
+              {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-medium tracking-tight">
-                  Select an Existing Image
+                  Select an Image
                 </h3>
                 <Button
                   onClick={() => setShowImageSelector(false)}
@@ -174,29 +181,69 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               </div>
 
               {/* Upload Button in Modal */}
-              <div className="mb-6">
-                <CldUploadWidget
-                  onSuccess={onSuccess}
-                  uploadPreset="nwkydo0u"
-                  options={{
-                    folder: "next-cloudinary",
-                  }}
-                >
-                  {({ open }) => (
-                    <Button
-                      type="button"
-                      onClick={() => open()}
-                      disabled={disabled}
-                      variant="secondary"
-                      className="w-full bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700"
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex-1">
+                  <CldUploadWidget
+                    onSuccess={onSuccess}
+                    uploadPreset="nwkydo0u"
+                    options={{
+                      folder: "next-cloudinary",
+                    }}
+                  >
+                    {({ open }) => (
+                      <Button
+                        type="button"
+                        onClick={() => open()}
+                        disabled={disabled}
+                        variant="secondary"
+                        className="bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload new image
+                      </Button>
+                    )}
+                  </CldUploadWidget>
+                </div>
+                <div className="flex items-center">
+                  <Button
+                    onClick={fetchCloudinaryImages}
+                    variant="outline"
+                    size="sm"
+                    className="ml-2 border-zinc-700 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+                    disabled={isLoading}
+                  >
+                    <div
+                      className={`h-4 w-4 mr-1 ${
+                        isLoading ? "animate-spin" : ""
+                      }`}
                     >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload images to Cloudinary
-                    </Button>
-                  )}
-                </CldUploadWidget>
+                      {isLoading ? (
+                        <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent" />
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M21 2v6h-6"></path>
+                          <path d="M3 12a9 9 0 0 1 15-6.7l3 2.7"></path>
+                          <path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"></path>
+                          <path d="M21 22v-6h-6"></path>
+                        </svg>
+                      )}
+                    </div>
+                    Refresh
+                  </Button>
+                </div>
               </div>
 
+              {/* Image Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-h-[60vh] overflow-y-auto p-1">
                 {existingImages.length > 0 ? (
                   existingImages.map((url) => (
@@ -248,7 +295,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                   ))
                 ) : (
                   <div className="col-span-full flex items-center justify-center py-12 text-zinc-400">
-                    No images available in your Cloudinary account
+                    {isLoading
+                      ? "Loading images..."
+                      : "No images available in your Cloudinary account"}
                   </div>
                 )}
               </div>
